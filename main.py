@@ -64,7 +64,7 @@ class Comment(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-
+# admin decorator 
 def admin_only(function):
     @wraps(function)
     def wrapper_function(*args, **kwargs):
@@ -75,13 +75,13 @@ def admin_only(function):
     return wrapper_function
 
 
-
+# shows all posts
 @app.route('/')
 def get_all_posts():
     posts = BlogPost.query.all()
     return render_template("index.html", all_posts=posts, logged_in=current_user.is_authenticated)
 
-
+# allows registration
 @app.route('/register',methods=['POST','GET'])
 def register():
     form = RegisterForm()
@@ -103,7 +103,7 @@ def register():
 
 
 
-
+# allows user to login
 @app.route('/login',methods=['POST','GET'])
 def login():
     
@@ -126,13 +126,15 @@ def login():
     
     return render_template("login.html",form=form, logged_in=current_user.is_authenticated)
 
-
+# allows user to logout
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('get_all_posts'))
 
 
+
+# shows post that user clicked
 @app.route("/post/<int:post_id>",methods=['POST','GET'])
 def show_post(post_id):
     form=CommentForm()
@@ -146,18 +148,20 @@ def show_post(post_id):
         db.session.commit()
     return render_template("post.html", post=requested_post, logged_in=current_user.is_authenticated,form=form,all_comments=comments)
 
-
+# about page
 @app.route("/about")
 def about():
     return render_template("about.html", logged_in=current_user.is_authenticated)
 
-
+# contact page
 @app.route("/contact")
 def contact():
     return render_template("contact.html", logged_in=current_user.is_authenticated)
 
 
-@app.route("/new-post")
+
+# adds a new post
+@app.route("/new-post",methods=['POST','GET'])
 @login_required
 @admin_only
 def add_new_post():
@@ -177,7 +181,9 @@ def add_new_post():
     return render_template("make-post.html", form=form, logged_in=current_user.is_authenticated)
 
 
-@app.route("/edit-post/<int:post_id>")
+
+# allows admin to edit post
+@app.route("/edit-post/<int:post_id>",methods=['POST','GET'])
 @login_required
 @admin_only
 def edit_post(post_id):
@@ -201,6 +207,8 @@ def edit_post(post_id):
     return render_template("make-post.html", form=edit_form, logged_in=current_user.is_authenticated)
 
 
+
+# allows admin to delete a post
 @app.route("/delete/<int:post_id>")
 @login_required
 @admin_only
